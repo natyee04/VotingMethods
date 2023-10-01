@@ -30,13 +30,13 @@ public class BenefitFormat implements RepresentationFormat{
     @Override
     public String getFormattedString(Representation representation) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("State           | Reps|Benefit\n");
+        stringBuilder.append("State           | Reps| Benefit\n");
         var states = new ArrayList<>(representation.getStates());
-        double divisor = getDivisor(states, representation);
 
+        double divisor = getDivisor(states, representation);
         for (State state : states) {
             double quota = state.population()/divisor;
-            double benefit = quota - representation.getRepresentativesFor(state);
+            double benefit = representation.getRepresentativesFor(state) - quota;
             var stateString = getRepresentationStringForState(representation, state, benefit);
             stringBuilder.append(stateString);
         }
