@@ -3,7 +3,7 @@
 # Homework 3 - Incremental Development 
 
 ## Authors
-1) Rebecca Wu, nxh9rk, nxk9rk 
+1) Rebecca Wu, nxh9rk, nxh9rk 
 2) Name, netid, [GitHub profile name]
 3) Name, netid, [GitHub profile name]
 
