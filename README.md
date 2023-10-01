@@ -3,7 +3,7 @@
 # Homework 3 - Incremental Development 
 
 ## Authors
-1) Name, netid, [GitHub profile name]
+1) Rebecca Wu, nxh9rk, nxk9rk 
 2) Name, netid, [GitHub profile name]
 3) Name, netid, [GitHub profile name]
 
@@ -15,7 +15,7 @@
 
 List the primary contributions of each author. It is recommended to update this with your contributions after each coding session.:
 
-### [Author 1 - replace this with their name]
+### Rebecca Wu
 
 * Author 1 contributions
 * as a bulleted list
