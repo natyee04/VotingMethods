@@ -89,8 +89,8 @@ public class BenefitFormatTest {
         var representation = new Representation(new HashMap<>(
                 Map.of(new State("Pennsylvania", 13002700), 12,
                         new State("Maryland", 6177224), 5,
-                        new State("Virginia", 8631393), 7,
-                        new State("West Virginia", 1793716), 1,
+                        new State("West Virginia", 8631393), 4,
+                        new State("Virginia", 8631393), 4,
                         new State("Delaware", 1), 0
                 )));
 

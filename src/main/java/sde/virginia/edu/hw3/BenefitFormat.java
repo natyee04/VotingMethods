@@ -1,11 +1,9 @@
 package sde.virginia.edu.hw3;
 
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BenefitFormat implements RepresentationFormat{
     private DisplayOrder displayOrder;
@@ -41,16 +39,19 @@ public class BenefitFormat implements RepresentationFormat{
 
     private void getStateStrings(Representation representation, StringBuilder stringBuilder, Map<State, Double> stateBenefitHashMap) {
         var sortedStateBenefitList = sortByDisplayOrder(displayOrder, stateBenefitHashMap);
-        for (Map.Entry<State, Double> state: sortedStateBenefitList){
-            var stateString = getRepresentationStringForState(representation, state.getKey(), state.getValue());
+        for (Map.Entry<State, Double> stateBenefit: sortedStateBenefitList){
+            var stateString = getRepresentationStringForState(representation, stateBenefit.getKey(), stateBenefit.getValue());
             stringBuilder.append(stateString);
         }
     }
 
     private static String getRepresentationStringForState(Representation representation, State state, double benefit) {
-        String sign = (benefit > 0) ? "+" : (benefit < 0) ? "-" : "";
-        return String.format("%-16s|%5d|%s%7.3f\n",
-                state.name(), representation.getRepresentativesFor(state), sign, Math.abs(benefit));
+        double tolerance = 1e-2;
+        if (Math.abs(benefit) < tolerance){
+            benefit = 0.0;
+        }
+        return String.format("%-16s|%5d|%+7.3f\n",
+                state.name(), representation.getRepresentativesFor(state), benefit);
     }
 
     private void calculateBenefitForStates(Representation representation, Map<State, Double> stateBenefitHashMap, ArrayList<State> states, double divisor) {
@@ -63,19 +64,25 @@ public class BenefitFormat implements RepresentationFormat{
 
     private static List<Map.Entry<State, Double>> sortByDisplayOrder(DisplayOrder displayOrder, Map<State, Double> stateBenefitHashMap){
         List<Map.Entry<State, Double>> stateBenefitList = new ArrayList<>(stateBenefitHashMap.entrySet());
-        if (displayOrder == DisplayOrder.DESCENDING) {
-            stateBenefitList.sort((entry1, entry2) -> Double.compare(entry2.getValue(), entry1.getValue()));
-        }
-        else {
-            stateBenefitList.sort((entry1, entry2) -> Double.compare(entry1.getValue(), entry2.getValue()));
-        }
+        stateBenefitList.sort(getBenefitComparator(displayOrder));
         return stateBenefitList;
     }
 
+    private static Comparator<Map.Entry<State, Double>> getBenefitComparator(DisplayOrder displayOrder) {
+        var comparator = Comparator.<Map.Entry<State, Double>>comparingDouble(entry -> entry.getValue())
+                .reversed()
+                .thenComparing(entry -> entry.getKey().name());
+        if (displayOrder == DisplayOrder.ASCENDING) {
+            comparator = Comparator.<Map.Entry<State, Double>>comparingDouble(entry -> entry.getValue())
+                    .thenComparing(entry -> entry.getKey().name());
+        }
+        return comparator;
+    }
+
     private static double getDivisor(ArrayList<State> states, Representation representation){
-        var total_population = getTotalPopulation(states);
-        var total_representatives = representation.getAllocatedRepresentatives();
-        return (double) total_population/total_representatives;
+        var totalPopulation = getTotalPopulation(states);
+        var totalRepresentatives = representation.getAllocatedRepresentatives();
+        return (double) totalPopulation/totalRepresentatives;
     }
 
     private static int getTotalPopulation(ArrayList<State> states){
