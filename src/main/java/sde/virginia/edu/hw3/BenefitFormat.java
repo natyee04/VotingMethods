@@ -1,6 +1,10 @@
 package sde.virginia.edu.hw3;
 
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BenefitFormat implements RepresentationFormat{
     private DisplayOrder displayOrder;
@@ -30,21 +34,32 @@ public class BenefitFormat implements RepresentationFormat{
     @Override
     public String getFormattedString(Representation representation) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("State           | Reps| Benefit\n");
-        var states = new ArrayList<>(representation.getStates());
+        stringBuilder.append("State           | Reps|Benefit\n");
+        Map<State, Double> stateBenefit = new HashMap<>();
 
+        var states = new ArrayList<>(representation.getStates());
         double divisor = getDivisor(states, representation);
-        for (State state : states) {
+
+        //Adding benefit to each state in hashmap
+        for (State state : states){
             double quota = state.population()/divisor;
             double benefit = representation.getRepresentativesFor(state) - quota;
-            var stateString = getRepresentationStringForState(representation, state, benefit);
+            stateBenefit.put(state, benefit);
+        }
+
+        List<Map.Entry<State, Double>> stateBenefitList = new ArrayList<>(stateBenefit.entrySet());
+        stateBenefitList.sort((entry1, entry2) -> Double.compare(entry2.getValue(), entry1.getValue()));
+
+        for (Map.Entry<State, Double> state: stateBenefitList){
+            var stateString = getRepresentationStringForState(representation, state.getKey(), state.getValue());
             stringBuilder.append(stateString);
         }
+
         return stringBuilder.toString();
     }
 
     private static String getRepresentationStringForState(Representation representation, State state, double benefit) {
-        return String.format("%-16s|%5d|%+7f\n",
+        return String.format("%-16s|%5d|%+7.3f\n",
                 state.name(), representation.getRepresentativesFor(state), benefit);
     }
 

@@ -21,12 +21,12 @@ public class BenefitFormatTest {
 
         var format = new BenefitFormat(DisplayOrder.ASCENDING);
         var expected = """
-                State           | Reps| Benefit
-                Pennsylvania    |   12|  +1.375
-                Maryland        |    5|  -0.048
-                Virginia        |    7|  -0.053
-                West Virginia   |    1|  -0.466
-                Delaware        |    0|  -0.809
+                State           | Reps|Benefit
+                Pennsylvania    |   12| +1.375
+                Maryland        |    5| -0.048
+                Virginia        |    7| -0.053
+                West Virginia   |    1| -0.466
+                Delaware        |    0| -0.809
                 """;
         assertEquals(expected, format.getFormattedString(representation));
     }
