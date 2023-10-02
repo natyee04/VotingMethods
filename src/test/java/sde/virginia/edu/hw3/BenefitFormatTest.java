@@ -121,8 +121,8 @@ public class BenefitFormatTest {
                 State           | Reps|Benefit
                 Pennsylvania    |   12| +1.375
                 Virginia        |    7| -0.053
-                Maryland        |    3| -0.257
                 West Virginia   |    3| -0.257
+                Maryland        |    3| -0.257
                 Delaware        |    0| -0.809
                 """;
         assertEquals(expected, format.getFormattedString(representation));

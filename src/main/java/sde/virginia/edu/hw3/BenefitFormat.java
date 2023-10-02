@@ -73,7 +73,7 @@ public class BenefitFormat implements RepresentationFormat{
     private static Comparator<Map.Entry<State, Double>> getBenefitComparator(DisplayOrder displayOrder) {
         var comparator = Comparator.<Map.Entry<State, Double>>comparingDouble(Map.Entry::getValue)
                 .reversed()
-                .thenComparing(entry -> entry.getKey().name());
+                .thenComparing(entry -> entry.getKey().name(), Comparator.reverseOrder());
         if (displayOrder == DisplayOrder.ASCENDING) {
             comparator = Comparator.<Map.Entry<State, Double>>comparingDouble(Map.Entry::getValue)
                     .thenComparing(entry -> entry.getKey().name());
