@@ -1,8 +1,5 @@
 package sde.virginia.edu.hw3;
 
-
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.*;
 
 public class BenefitFormat implements RepresentationFormat{
@@ -46,12 +43,17 @@ public class BenefitFormat implements RepresentationFormat{
     }
 
     private static String getRepresentationStringForState(Representation representation, State state, double benefit) {
-        double tolerance = 1e-2;
-        if (Math.abs(benefit) < tolerance){
-            benefit = 0.0;
+        String roundedBenefit = String.format("%.3f", benefit);
+        String formattedBenefit;
+        if (Double.parseDouble(roundedBenefit) > 0){
+            formattedBenefit = "+" + roundedBenefit;
+        } else if (Double.parseDouble(roundedBenefit) < 0){
+            formattedBenefit = roundedBenefit;
+        } else{
+            formattedBenefit = "0.000";
         }
-        return String.format("%-16s|%5d|%+7.3f\n",
-                state.name(), representation.getRepresentativesFor(state), benefit);
+        return String.format("%-16s|%5d|%7s\n",
+                state.name(), representation.getRepresentativesFor(state), formattedBenefit);
     }
 
     private void calculateBenefitForStates(Representation representation, Map<State, Double> stateBenefitHashMap, ArrayList<State> states, double divisor) {
@@ -69,11 +71,11 @@ public class BenefitFormat implements RepresentationFormat{
     }
 
     private static Comparator<Map.Entry<State, Double>> getBenefitComparator(DisplayOrder displayOrder) {
-        var comparator = Comparator.<Map.Entry<State, Double>>comparingDouble(entry -> entry.getValue())
+        var comparator = Comparator.<Map.Entry<State, Double>>comparingDouble(Map.Entry::getValue)
                 .reversed()
                 .thenComparing(entry -> entry.getKey().name());
         if (displayOrder == DisplayOrder.ASCENDING) {
-            comparator = Comparator.<Map.Entry<State, Double>>comparingDouble(entry -> entry.getValue())
+            comparator = Comparator.<Map.Entry<State, Double>>comparingDouble(Map.Entry::getValue)
                     .thenComparing(entry -> entry.getKey().name());
         }
         return comparator;
