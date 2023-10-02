@@ -63,6 +63,28 @@ public class BenefitFormatTest {
     }
 
     @Test
+    void getFormattedString_ascending_sameBenefit() {
+        var representation = new Representation(new HashMap<>(
+                Map.of(new State("Pennsylvania", 13002700), 12,
+                        new State("Maryland", 3985470), 3,
+                        new State("Virginia", 8631393), 7,
+                        new State("West Virginia", 3985470), 3,
+                        new State("Delaware", 989948), 0
+                )));
+
+        var format = new BenefitFormat(DisplayOrder.ASCENDING);
+        var expected = """
+                State           | Reps|Benefit
+                Delaware        |    0| -0.809
+                Maryland        |    3| -0.257
+                West Virginia   |    3| -0.257
+                Virginia        |    7| -0.053
+                Pennsylvania    |   12| +1.375
+                """;
+        assertEquals(expected, format.getFormattedString(representation));
+    }
+
+    @Test
     void getFormattedString_descending() {
         var representation = new Representation(new HashMap<>(
                 Map.of(new State("Pennsylvania", 13002700), 12,
@@ -85,24 +107,45 @@ public class BenefitFormatTest {
     }
 
     @Test
-    void getFormattedString_descending_edge() {
+    void getFormattedString_descending_sameBenefit() {
         var representation = new Representation(new HashMap<>(
                 Map.of(new State("Pennsylvania", 13002700), 12,
-                        new State("Maryland", 6177224), 5,
-                        new State("West Virginia", 8631393), 4,
-                        new State("Virginia", 8631393), 4,
-                        new State("Delaware", 1), 0
+                        new State("Maryland", 3985470), 3,
+                        new State("Virginia", 8631393), 7,
+                        new State("West Virginia", 3985470), 3,
+                        new State("Delaware", 989948), 0
                 )));
 
         var format = new BenefitFormat(DisplayOrder.DESCENDING);
         var expected = """
                 State           | Reps|Benefit
                 Pennsylvania    |   12| +1.375
-                Delaware        |    0|  0.000
-                Maryland        |    5| -0.048
                 Virginia        |    7| -0.053
-                West Virginia   |    1| -0.466
-                
+                Maryland        |    3| -0.257
+                West Virginia   |    3| -0.257
+                Delaware        |    0| -0.809
+                """;
+        assertEquals(expected, format.getFormattedString(representation));
+    }
+
+    @Test
+    void getFormattedString_zeroRepresentatives() {
+        var representation = new Representation(new HashMap<>(
+                Map.of(new State("Pennsylvania", 1), 0,
+                        new State("Maryland", 1), 0,
+                        new State("West Virginia", 1), 0,
+                        new State("Virginia", 1), 0,
+                        new State("Delaware", 1), 0
+                )));
+
+        var format = new BenefitFormat(DisplayOrder.DESCENDING);
+        var expected = """
+                State           | Reps|Benefit
+                Delaware        |    0|  0.000
+                Maryland        |    0|  0.000
+                Pennsylvania    |    0|  0.000
+                Virginia        |    0|  0.000
+                West Virginia   |    0|  0.000
                 """;
         assertEquals(expected, format.getFormattedString(representation));
     }
