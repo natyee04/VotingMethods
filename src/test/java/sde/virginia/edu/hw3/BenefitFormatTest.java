@@ -141,11 +141,11 @@ public class BenefitFormatTest {
         var format = new BenefitFormat(DisplayOrder.DESCENDING);
         var expected = """
                 State           | Reps|Benefit
-                Delaware        |    0|  0.000
-                Maryland        |    0|  0.000
-                Pennsylvania    |    0|  0.000
-                Virginia        |    0|  0.000
                 West Virginia   |    0|  0.000
+                Virginia        |    0|  0.000
+                Pennsylvania    |    0|  0.000
+                Maryland        |    0|  0.000
+                Delaware        |    0|  0.000
                 """;
         assertEquals(expected, format.getFormattedString(representation));
     }
