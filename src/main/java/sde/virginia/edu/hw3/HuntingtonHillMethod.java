@@ -5,6 +5,7 @@ import java.util.Map;
 public class HuntingtonHillMethod implements ApportionmentMethod{
     @Override
     public Representation getRepresentation(List<State> states, int targetRepresentatives) {
+        validateInputs(states, targetRepresentatives);
         Map<State, Integer> representation = new HashMap<>();
         for (State state: states){
             representation.put(state, 1);
@@ -25,5 +26,18 @@ public class HuntingtonHillMethod implements ApportionmentMethod{
             remainRepresentatives -= 1;
         }
         return new Representation(representation);
+    }
+    @Override
+    public void validateInputs(List<State> states, int targetRepresentatives) {
+        if (states.isEmpty()) {
+            throw new IllegalArgumentException("Cannot apportion representatives to an empty list of states");
+        }
+        if (targetRepresentatives < 0) {
+            throw new IllegalArgumentException("Cannot apportion a negative number of representatives");
+        }
+
+        if(states.size()>targetRepresentatives){
+            throw new IllegalArgumentException("Cannot have more states than representatives");
+        }
     }
 }
