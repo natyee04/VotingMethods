@@ -26,5 +26,4 @@ public class HuntingtonHillMethod implements ApportionmentMethod{
         }
         return new Representation(representation);
     }
-
 }
