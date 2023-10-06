@@ -6,13 +6,13 @@ public class ApportionmentMethodFactory {
     }
 
     public ApportionmentMethod getMethod(String method) {
-        if (method.equals("adams")) {
+        if (method.equalsIgnoreCase("adams")) {
             return new AdamsMethod();
         }
-        if (method.equals("jefferson")) {
+        if (method.equalsIgnoreCase("jefferson")) {
             return new JeffersonMethod();
         }
-        if (method.equals("huntington")) {
+        if (method.equalsIgnoreCase("huntington")) {
             return new HuntingtonHillMethod();
         }
 
