@@ -6,6 +6,8 @@ package sde.virginia.edu.hw3;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -20,24 +22,46 @@ class ArgumentsTest {
         assertThrows(IllegalArgumentException.class, () -> new Arguments(args));
     }
 
+    private String getResource(String resourceName) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        try {
+            return Objects.requireNonNull(classLoader.getResource(resourceName)).toURI().getPath();
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error! The resource was unable to be loaded.");
+        }
+    }
+
     @Test
     void getStateSupplier_csv() {
-        var classLoader = CSVStateReaderTest.class.getClassLoader();
-        var args = new String[] {"mixedColumns.csv"};
+        var filename = getResource("mixedColumns.csv");
+        var args = new String[] {filename};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(CSVStateReader.class, arguments.getStateSupplier());
     }
 
     @Test
     void getStateSupplier_xls() {
+        var filename = getResource("excelExampleNormal.xls");
+        var args = new String[] {filename};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(SpreadsheetStateReader.class, arguments.getStateSupplier());
+
     }
 
     @Test
     void getStateSupplier_xlsx() {
+        var filename = getResource("excelExampleNormal.xlsx");
+        var args = new String[] {filename};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(SpreadsheetStateReader.class, arguments.getStateSupplier());
     }
 
     @Test
     void getStateSupplier_fileNotFound() {
+        var args = new String[] {"notARealFile.csv"};
+        Arguments arguments = new Arguments(args);
+        assertThrows(IllegalArgumentException.class, arguments::getStateSupplier);
     }
 
     @Test
