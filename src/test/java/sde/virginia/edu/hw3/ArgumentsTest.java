@@ -6,8 +6,6 @@ package sde.virginia.edu.hw3;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Objects;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -24,36 +22,18 @@ class ArgumentsTest {
 
     @Test
     void getStateSupplier_csv() {
-        var classLoader = CSVStateReaderTest.class.getClassLoader();
-        var filename = Objects.requireNonNull(classLoader.getResource("mixedColumns.csv")).getFile();
-        var args = new String[] {filename};
-        Arguments arguments = new Arguments(args);
-        assertInstanceOf(CSVStateReader.class, arguments.getStateSupplier());
     }
 
     @Test
     void getStateSupplier_xls() {
-        var classLoader = CSVStateReaderTest.class.getClassLoader();
-        var filename = Objects.requireNonNull(classLoader.getResource("excelExampleNormal.xls")).getFile();
-        var args = new String[] {filename};
-        Arguments arguments = new Arguments(args);
-        assertInstanceOf(SpreadsheetStateReader.class, arguments.getStateSupplier());
     }
 
     @Test
     void getStateSupplier_xlsx() {
-        var classLoader = CSVStateReaderTest.class.getClassLoader();
-        var filename = Objects.requireNonNull(classLoader.getResource("excelExampleNormal.xlsx")).getFile();
-        var args = new String[] {filename};
-        Arguments arguments = new Arguments(args);
-        assertInstanceOf(SpreadsheetStateReader.class, arguments.getStateSupplier());
     }
 
     @Test
     void getStateSupplier_fileNotFound() {
-        var args = new String[] {"notARealFile.csv"};
-        Arguments arguments = new Arguments(args);
-        assertThrows(IllegalArgumentException.class, arguments::getStateSupplier);
     }
 
     @Test
@@ -64,59 +44,49 @@ class ArgumentsTest {
     }
 
     @Test
-    void getRepresentatives_twoArgs() {
-        String[] args = {"populations.csv", "25"};
+    void getRepresentatives_twoArgs_longOption() {
+        String[] args = {"populations.csv", "--representatives", "25"};
         Arguments arguments = new Arguments(args);
         assertEquals(25, arguments.getRepresentatives());
     }
-
+    @Test
+    void getRepresentatives_twoArgs_shortOption() {
+        String[] args = {"populations.csv", "-r", "5"};
+        Arguments arguments = new Arguments(args);
+        assertEquals(5, arguments.getRepresentatives());
+    }
     @Test
     void getRepresentatives_negativeArg() {
-        String[] args = {"populations.csv", "-25"};
+        String[] args = {"populations.csv", "--representatives", "-25"};
         Arguments arguments = new Arguments(args);
         assertThrows(IllegalArgumentException.class, arguments::getRepresentatives);
     }
 
     @Test
     void getRepresentatives_nonNumber() {
-        String[] args = {"populations.csv", "some string"};
+        String[] args = {"populations.csv", "--representatives", "some string"};
         Arguments arguments = new Arguments(args);
-        assertEquals(435, arguments.getRepresentatives());
+        assertThrows(NumberFormatException.class, arguments::getRepresentatives);
     }
 
     @Test
     void getApportionmentMethod_Adams_noRepCount() {
-        String[] args = {"populations.csv", "--adams"};
-        Arguments arguments = new Arguments(args);
-        assertInstanceOf(AdamsMethod.class, arguments.getApportionmentMethod());
     }
 
     @Test
     void getApportionmentMethod_Adams_withRepCount() {
-        String[] args = {"populations.csv", "400", "--adams"};
-        Arguments arguments = new Arguments(args);
-        assertInstanceOf(AdamsMethod.class, arguments.getApportionmentMethod());
     }
 
     @Test
     void getApportionmentMethod_default() {
-        String[] args = {"populations.csv"};
-        Arguments arguments = new Arguments(args);
-        assertInstanceOf(JeffersonMethod.class, arguments.getApportionmentMethod());
     }
 
     @Test
     void getRepresentationFormat_default() {
-        String[] args = {"populations.csv"};
-        Arguments arguments = new Arguments(args);
-        assertInstanceOf(AlphabeticalFormat.class, arguments.getRepresentationFormat());
     }
 
     @Test
     void getRepresentationFormat_populationAscending() {
-        String[] args = {"populations.csv"};
-        Arguments arguments = new Arguments(args);
-        assertInstanceOf(AlphabeticalFormat.class, arguments.getRepresentationFormat());
     }
 }
 

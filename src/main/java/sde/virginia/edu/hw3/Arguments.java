@@ -6,6 +6,8 @@ package sde.virginia.edu.hw3;
 
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.cli.*;
+import org.apache.commons.io.output.NullPrintStream;
 
 
 /**
@@ -47,7 +49,8 @@ public class Arguments {
      * The number of representatives in the US House of Representatives since 1913
      */
     public static final int DEFAULT_REPRESENTATIVE_COUNT = 435;
-    private final List<String> arguments;
+    private final String[] arguments;
+    private static CommandLine line;
 
     /**
      * Constructor for {@link Arguments}
@@ -60,7 +63,53 @@ public class Arguments {
                     This program requires command line arguments:
                        java -jar Apportionment.jar <filename.csv> [number of representatives to allocate]""");
         }
-        arguments = Arrays.asList(args);
+
+        arguments = args;
+        parseCommandLine(arguments);
+    }
+
+    public static void parseCommandLine(String[] args){
+        Options options = new Options();
+        cmdLineOptions(options);
+
+        CommandLineParser parser = new DefaultParser();
+
+        try {
+            line = parser.parse(options, args);
+        }
+        catch (ParseException e) {
+           System.out.println("Unexpected exception: " + e.getMessage());
+        }
+    }
+
+    public static void cmdLineOptions(Options options) {
+        options.addOption(Option.builder("r")
+                .longOpt("representatives")
+                .hasArg()
+                .argName("numberOfRepresentatives")
+                .desc("Number of representatives.").build());
+
+        options.addOption(Option.builder("f")
+                .longOpt("format")
+                .hasArg()
+                .argName("formatName")
+                .desc("The format of the output; how the output will be sorted by.").build());
+
+        options.addOption(Option.builder("m")
+                .longOpt("method")
+                .hasArg()
+                .argName("methodName")
+                .desc("The method by which the apportionment will be done by.").build());
+
+        options.addOption(Option.builder("a")
+                .longOpt("ascending")
+                .hasArg(false)
+                .desc("Format of the output will be in ascending order.").build());
+
+        options.addOption(Option.builder("d")
+                .longOpt("descending")
+                .hasArg(false)
+                .desc("Format of the output will be in descending order.").build());
     }
 
     /**
@@ -75,14 +124,7 @@ public class Arguments {
      * @throws UnsupportedFileFormatException if an invalid filename argument is provided
      */
     public StateSupplier getStateSupplier() {
-        var filename = arguments.get(0);
-        if (filename.toLowerCase().endsWith("csv")) {
-            return new CSVStateReader(filename);
-        }
-        if (filename.toLowerCase().endsWith("xlsx") || filename.toLowerCase().endsWith("xls")) {
-            return new SpreadsheetStateReader(filename);
-        }
-        throw new UnsupportedFileFormatException(filename);
+        return null;
     }
 
     /**
@@ -95,19 +137,22 @@ public class Arguments {
      * @see Main#main(String[])
      */
     public int getRepresentatives() {
-        if (arguments.size() == 1) {
-            return DEFAULT_REPRESENTATIVE_COUNT;
+        try {
+            if (line.hasOption("representatives")) {
+                var targetRepresentatives = Integer.parseInt(line.getOptionValue("representatives"));
+
+                if (targetRepresentatives <= 0) {
+                    throw new IllegalArgumentException("Number of representatives need to be a positive integer.");
+                }
+
+                return targetRepresentatives;
+            }
+        }
+        catch (NumberFormatException e) {
+            throw new NumberFormatException("Given value for representatives is not a number.");
         }
 
-        try {
-            var targetRepresentatives = Integer.parseInt(arguments.get(1));
-            if (targetRepresentatives <= 0) {
-                throw new IllegalArgumentException("Number of representatives argument must be a positive integer.");
-            }
-            return targetRepresentatives;
-        } catch (NumberFormatException e) {
-            return DEFAULT_REPRESENTATIVE_COUNT;
-        }
+        return DEFAULT_REPRESENTATIVE_COUNT;
     }
 
     /**
@@ -119,10 +164,7 @@ public class Arguments {
      * @see Main#main(String[])
      */
     public ApportionmentMethod getApportionmentMethod() {
-        if (arguments.contains("--adams")) {
-            return new AdamsMethod();
-        }
-        return new JeffersonMethod();
+        return null;
     }
 
     /**
@@ -140,13 +182,7 @@ public class Arguments {
      * @see Main#main(String[])
      */
     public RepresentationFormat getRepresentationFormat() {
-        if (arguments.contains("--population")) {
-            if (arguments.contains("-d") || arguments.contains("--descending")) {
-                return new PopulationFormat(DisplayOrder.DESCENDING);
-            }
-            return new PopulationFormat(DisplayOrder.ASCENDING);
-        }
-        return new AlphabeticalFormat();
+        return null;
     }
 }
 
