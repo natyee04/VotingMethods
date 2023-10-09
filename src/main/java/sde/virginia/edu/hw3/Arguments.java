@@ -169,7 +169,13 @@ public class Arguments {
      * @see Main#main(String[])
      */
     public ApportionmentMethod getApportionmentMethod() {
-        return null;
+        ApportionmentMethodFactory factory = new ApportionmentMethodFactory();
+
+        if (line.hasOption("method")) {
+            return factory.getMethod(line.getOptionValue("method"));
+        }
+
+        return factory.getDefaultMethod();
     }
 
     /**
@@ -187,7 +193,17 @@ public class Arguments {
      * @see Main#main(String[])
      */
     public RepresentationFormat getRepresentationFormat() {
-        return null;
+        RepresentationFormatFactory factory = new RepresentationFormatFactory();
+
+        if (line.hasOption("ascending") && line.hasOption("descending")) {
+            throw new IllegalArgumentException("Cannot sort the format by both ascending and descending.");
+        }
+
+        if (line.hasOption("format")) {
+            return factory.getFormat(line.getOptionValue("format"));
+        }
+
+        return factory.getDefaultFormat();
     }
 }
 
