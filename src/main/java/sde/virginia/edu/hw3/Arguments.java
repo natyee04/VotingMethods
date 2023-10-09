@@ -4,6 +4,7 @@
 
 package sde.virginia.edu.hw3;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.cli.*;
@@ -50,6 +51,7 @@ public class Arguments {
      */
     public static final int DEFAULT_REPRESENTATIVE_COUNT = 435;
     private final String[] arguments;
+    private final List<String> argumentsAsList;
     private static CommandLine line;
 
     /**
@@ -65,6 +67,7 @@ public class Arguments {
         }
 
         arguments = args;
+        argumentsAsList = Arrays.asList(args);
         parseCommandLine(arguments);
     }
 
@@ -124,7 +127,9 @@ public class Arguments {
      * @throws UnsupportedFileFormatException if an invalid filename argument is provided
      */
     public StateSupplier getStateSupplier() {
-        return null;
+        StateSupplier supplier = new StateSupplierFactory().getStateSupplier(argumentsAsList.get(0));
+
+        return supplier;
     }
 
     /**

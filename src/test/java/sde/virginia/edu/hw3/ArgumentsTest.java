@@ -22,6 +22,10 @@ class ArgumentsTest {
 
     @Test
     void getStateSupplier_csv() {
+        var classLoader = CSVStateReaderTest.class.getClassLoader();
+        var args = new String[] {"mixedColumns.csv"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(CSVStateReader.class, arguments.getStateSupplier());
     }
 
     @Test
