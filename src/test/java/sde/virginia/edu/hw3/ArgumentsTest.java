@@ -140,10 +140,44 @@ class ArgumentsTest {
 
     @Test
     void getRepresentationFormat_default() {
+        String[] args = {"populations.csv"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(AlphabeticalFormat.class, arguments.getRepresentationFormat());
     }
 
     @Test
-    void getRepresentationFormat_populationAscending() {
+    void getRepresentationFormat_benefitFormat_longOption() {
+        String[] args = {"populations.csv", "--format", "benefit"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(BenefitFormat.class, arguments.getRepresentationFormat());
+    }
+
+    @Test
+    void getRepresentationFormat_benefitFormat_shortOption() {
+        String[] args = {"populations.csv", "-f", "benefit"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(BenefitFormat.class, arguments.getRepresentationFormat());
+    }
+
+    @Test
+    void getRepresentationFormat_benefitFormat_ascendingLongOption() {
+        String[] args = {"populations.csv", "-f", "benefit", "--ascending"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(BenefitFormat.class, arguments.getRepresentationFormat());
+    }
+
+    @Test
+    void getRepresentationFormat_benefitFormat_ascendingShortOption() {
+        String[] args = {"populations.csv", "-a", "-f", "benefit"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(BenefitFormat.class, arguments.getRepresentationFormat());
+    }
+
+    @Test
+    void getRepresentationFormat_populationFormat_descendingShortOption() {
+        String[] args = {"populations.csv", "-d", "-f", "population"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(PopulationFormat.class, arguments.getRepresentationFormat());
     }
 }
 

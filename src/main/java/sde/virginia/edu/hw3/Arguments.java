@@ -4,11 +4,9 @@
 
 package sde.virginia.edu.hw3;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.cli.*;
-import org.apache.commons.io.output.NullPrintStream;
 
 
 /**
@@ -73,7 +71,7 @@ public class Arguments {
 
     public static void parseCommandLine(String[] args){
         Options options = new Options();
-        cmdLineOptions(options);
+        commandLineOptions(options);
 
         CommandLineParser parser = new DefaultParser();
 
@@ -85,7 +83,7 @@ public class Arguments {
         }
     }
 
-    public static void cmdLineOptions(Options options) {
+    public static void commandLineOptions(Options options) {
         options.addOption(Option.builder("r")
                 .longOpt("representatives")
                 .hasArg()
@@ -200,7 +198,21 @@ public class Arguments {
         }
 
         if (line.hasOption("format")) {
-            return factory.getFormat(line.getOptionValue("format"));
+            var methodName = line.getOptionValue("format");
+
+            if (methodName.equalsIgnoreCase("alphabet")) {
+                return factory.getDefaultFormat();
+            }
+
+            if (line.hasOption("ascending")) {
+                return factory.getFormat(methodName, DisplayOrder.ASCENDING);
+            }
+
+            if (line.hasOption("descending")) {
+                return factory.getFormat(methodName, DisplayOrder.DESCENDING);
+            }
+
+            return factory.getFormat(methodName);
         }
 
         return factory.getDefaultFormat();
