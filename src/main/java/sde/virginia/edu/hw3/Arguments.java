@@ -49,10 +49,9 @@ public class Arguments {
      * The number of representatives in the US House of Representatives since 1913
      */
     public static final int DEFAULT_REPRESENTATIVE_COUNT = 435;
-    private final String[] arguments;
-    private final List<String> argumentsAsList;
-    private static CommandLine line;
-
+    private final List<String> arguments;
+    private final List<String> longOptions = Arrays.asList("--representatives", "--format", "--method", "--ascending", "--descending");
+    private final List<String> shortOptions = Arrays.asList("-r", "-f", "-m", "-a", "-d");
     /**
      * Constructor for {@link Arguments}
      *
@@ -65,53 +64,17 @@ public class Arguments {
                        java -jar Apportionment.jar <filename.csv> [number of representatives to allocate]""");
         }
 
-        arguments = args;
-        argumentsAsList = Arrays.asList(args);
-        parseCommandLine(arguments);
-    }
+        arguments = Arrays.asList(args);
 
-    public static void parseCommandLine(String[] args){
-        Options options = new Options();
-        commandLineOptions(options);
+        for (String options : arguments) {
 
-        CommandLineParser parser = new DefaultParser();
-
-        try {
-            line = parser.parse(options, args);
+            if (options.startsWith("--") && !longOptions.contains(options)) {
+                throw new IllegalArgumentException("Cannot have invalid long command option(s).");
+            }
+            else if (options.startsWith("-") && !options.matches("-?\\d+(\\.\\d+)?") && !shortOptions.contains(options) && options.charAt(1) != '-') {
+                throw new IllegalArgumentException("Cannot have invalid short command option(s).");
+            }
         }
-        catch (ParseException e) {
-           System.out.println("Unexpected exception: " + e.getMessage());
-        }
-    }
-
-    public static void commandLineOptions(Options options) {
-        options.addOption(Option.builder("r")
-                .longOpt("representatives")
-                .hasArg()
-                .argName("numberOfRepresentatives")
-                .desc("Number of representatives.").build());
-
-        options.addOption(Option.builder("f")
-                .longOpt("format")
-                .hasArg()
-                .argName("formatName")
-                .desc("The format of the output; how the output will be sorted by.").build());
-
-        options.addOption(Option.builder("m")
-                .longOpt("method")
-                .hasArg()
-                .argName("methodName")
-                .desc("The method by which the apportionment will be done by.").build());
-
-        options.addOption(Option.builder("a")
-                .longOpt("ascending")
-                .hasArg(false)
-                .desc("Format of the output will be in ascending order.").build());
-
-        options.addOption(Option.builder("d")
-                .longOpt("descending")
-                .hasArg(false)
-                .desc("Format of the output will be in descending order.").build());
     }
 
     /**
@@ -126,7 +89,7 @@ public class Arguments {
      * @throws UnsupportedFileFormatException if an invalid filename argument is provided
      */
     public StateSupplier getStateSupplier() {
-        StateSupplier supplier = new StateSupplierFactory().getStateSupplier(argumentsAsList.get(0));
+        StateSupplier supplier = new StateSupplierFactory().getStateSupplier(arguments.get(0));
 
         return supplier;
     }
@@ -140,24 +103,60 @@ public class Arguments {
      *
      * @see Main#main(String[])
      */
+
+    public void bothOptionsArePresent(String shortOption, String longOption) {
+        if (arguments.contains(shortOption) && arguments.contains(longOption)) {
+            throw new IllegalArgumentException("Cannot have both " + shortOption + " and " + longOption + ".");
+        };
+    }
+
+    public void optionOccurrences(String option) {
+        if (arguments.stream().filter(arguments -> arguments.equals(option)).count() > 1) {
+            throw new IllegalArgumentException("Cannot have multiple " + option + ".");
+        };
+    }
+
+    public void isTheOptionTheLastArgument(String option) {
+        if (arguments.indexOf(option) == arguments.size() - 1) {
+            throw new IllegalArgumentException("No value was given for the command " + option + ".");
+        }
+    }
+
+    public String setToPresentedOption(String shortOption, String longOption) {
+        if (arguments.contains(shortOption)) {
+            return shortOption;
+        }
+            return longOption;
+    }
+
     public int getRepresentatives() {
-        try {
-            if (line.hasOption("representatives")) {
-                var targetRepresentatives = Integer.parseInt(line.getOptionValue("representatives"));
 
-                if (targetRepresentatives <= 0) {
-                    throw new IllegalArgumentException("Number of representatives need to be a positive integer.");
-                }
+        String shortOption = "-r";
+        String longOption = "--representatives";
 
-                return targetRepresentatives;
-            }
-        }
-        catch (NumberFormatException e) {
-            throw new NumberFormatException("Given value for representatives is not a number.");
-        }
-        catch (NullPointerException e) {
-            throw new NullPointerException("An argument was not provide for representatives.");
-        }
+       bothOptionsArePresent(shortOption, longOption);
+       optionOccurrences(longOption);
+       optionOccurrences(shortOption);
+
+       try {
+           if (arguments.contains(shortOption) || arguments.contains(longOption)) {
+               String option = setToPresentedOption(shortOption, longOption);
+
+               isTheOptionTheLastArgument(option);
+
+               var targetRepresentatives = Integer.parseInt(arguments.get(arguments.indexOf(option) + 1));
+
+               if (targetRepresentatives <= 0) {
+                   throw new IllegalArgumentException("Number of representatives argument must be a positive integer.");
+               }
+               return targetRepresentatives;
+           }
+
+       } catch (NumberFormatException e) {
+           throw new NumberFormatException("The given value for representatives is not a number.");
+       } catch (NullPointerException e) {
+           throw new NullPointerException("No value is given for the representatives.");
+       }
 
         return DEFAULT_REPRESENTATIVE_COUNT;
     }
@@ -172,19 +171,6 @@ public class Arguments {
      */
     public ApportionmentMethod getApportionmentMethod() {
         ApportionmentMethodFactory factory = new ApportionmentMethodFactory();
-
-        try {
-            if (line.hasOption("method")) {
-                if (line.getOptionValue("method") == null) {
-                    throw new NullPointerException("No argument was given for method");
-                }
-                return factory.getMethod(line.getOptionValue("method"));
-            }
-        }
-        catch (NullPointerException e) {
-            throw new NullPointerException("An argument was not provide for method.");
-        }
-
         return factory.getDefaultMethod();
     }
 
@@ -205,36 +191,6 @@ public class Arguments {
     public RepresentationFormat getRepresentationFormat() {
         RepresentationFormatFactory factory = new RepresentationFormatFactory();
 
-        if (line.hasOption("ascending") && line.hasOption("descending")) {
-            throw new IllegalArgumentException("Cannot sort the format by both ascending and descending.");
-        }
-
-        try {
-            if (line.hasOption("format")) {
-                if (line.getOptionValue("format") == null) {
-                    throw new NullPointerException("No argument was given for format");
-                }
-
-                var methodName = line.getOptionValue("format");
-
-                if (methodName.equalsIgnoreCase("alphabet")) {
-                    return factory.getDefaultFormat();
-                }
-
-                if (line.hasOption("ascending")) {
-                    return factory.getFormat(methodName, DisplayOrder.ASCENDING);
-                }
-
-                if (line.hasOption("descending")) {
-                    return factory.getFormat(methodName, DisplayOrder.DESCENDING);
-                }
-
-                return factory.getFormat(methodName);
-            }
-        }
-        catch (NullPointerException e) {
-            throw new NullPointerException("An argument was not provide for method.");
-        }
 
         return factory.getDefaultFormat();
     }

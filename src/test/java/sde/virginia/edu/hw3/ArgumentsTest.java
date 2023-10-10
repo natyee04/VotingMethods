@@ -26,8 +26,7 @@ class ArgumentsTest {
         ClassLoader classLoader = getClass().getClassLoader();
         try {
             return Objects.requireNonNull(classLoader.getResource(resourceName)).toURI().getPath();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Error! The resource was unable to be loaded.");
         }
     }
@@ -35,7 +34,7 @@ class ArgumentsTest {
     @Test
     void getStateSupplier_csv() {
         var filename = getResource("mixedColumns.csv");
-        var args = new String[] {filename};
+        var args = new String[]{filename};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(CSVStateReader.class, arguments.getStateSupplier());
     }
@@ -43,7 +42,7 @@ class ArgumentsTest {
     @Test
     void getStateSupplier_xls() {
         var filename = getResource("excelExampleNormal.xls");
-        var args = new String[] {filename};
+        var args = new String[]{filename};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(SpreadsheetStateReader.class, arguments.getStateSupplier());
 
@@ -52,14 +51,14 @@ class ArgumentsTest {
     @Test
     void getStateSupplier_xlsx() {
         var filename = getResource("excelExampleNormal.xlsx");
-        var args = new String[] {filename};
+        var args = new String[]{filename};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(SpreadsheetStateReader.class, arguments.getStateSupplier());
     }
 
     @Test
     void getStateSupplier_fileNotFound() {
-        var args = new String[] {"notARealFile.csv"};
+        var args = new String[]{"notARealFile.csv"};
         Arguments arguments = new Arguments(args);
         assertThrows(IllegalArgumentException.class, arguments::getStateSupplier);
     }
@@ -77,12 +76,14 @@ class ArgumentsTest {
         Arguments arguments = new Arguments(args);
         assertEquals(25, arguments.getRepresentatives());
     }
+
     @Test
     void getRepresentatives_twoArgs_shortOption() {
         String[] args = {"populations.csv", "-r", "5"};
         Arguments arguments = new Arguments(args);
         assertEquals(5, arguments.getRepresentatives());
     }
+
     @Test
     void getRepresentatives_negativeArg() {
         String[] args = {"populations.csv", "--representatives", "-25"};
@@ -97,6 +98,23 @@ class ArgumentsTest {
         assertThrows(NumberFormatException.class, arguments::getRepresentatives);
     }
 
+    @Test
+    void getRepresentatives_multipleLongOption() {
+        String[] args = {"populations.csv", "--representatives", "--representatives", "23"};
+        Arguments arguments = new Arguments(args);
+        assertThrows(IllegalArgumentException.class, arguments::getRepresentatives);
+    }
+
+    @Test
+    void getRepresentatives_multipleShortOption() {
+        String[] args = {"populations.csv", "-r", "-r", "23"};
+        Arguments arguments = new Arguments(args);
+        assertThrows(IllegalArgumentException.class, arguments::getRepresentatives);
+    }
+
+}
+
+    /**
     @Test
     void getApportionmentMethod_Adams_noRepCount_longOption() {
         String[] args = {"populations.csv", "--method", "adams"};
@@ -180,7 +198,7 @@ class ArgumentsTest {
         assertInstanceOf(PopulationFormat.class, arguments.getRepresentationFormat());
     }
 }
-
+*/
 /*
  * Copyright (c) 2023. Paul "Will" McBurney <br>
  *
