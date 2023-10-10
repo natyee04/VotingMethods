@@ -112,9 +112,6 @@ class ArgumentsTest {
         assertThrows(IllegalArgumentException.class, arguments::getRepresentatives);
     }
 
-}
-
-    /**
     @Test
     void getApportionmentMethod_Adams_noRepCount_longOption() {
         String[] args = {"populations.csv", "--method", "adams"};
@@ -131,20 +128,21 @@ class ArgumentsTest {
 
     @Test
     void getApportionmentMethod_Adams_withRepCount() {
-        String[] args = {"populations.csv","--representatives", "300", "--method", "adams"};
+        String[] args = {"populations.csv", "--representatives", "300", "--method", "adams"};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(AdamsMethod.class, arguments.getApportionmentMethod());
     }
+
     @Test
     void getApportionmentMethod_HuntingtonHillMethod_withRepCount() {
-        String[] args = {"populations.csv","--representatives", "300", "--method", "huntington"};
+        String[] args = {"populations.csv", "--representatives", "300", "--method", "huntington"};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(HuntingtonHillMethod.class, arguments.getApportionmentMethod());
     }
 
     @Test
     void getApportionmentMethod_JeffersonMethod_withRepCount() {
-        String[] args = {"populations.csv","--representatives", "300", "--method", "jefferson"};
+        String[] args = {"populations.csv", "--representatives", "300", "--method", "jefferson"};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(JeffersonMethod.class, arguments.getApportionmentMethod());
     }
@@ -156,6 +154,9 @@ class ArgumentsTest {
         assertInstanceOf(HuntingtonHillMethod.class, arguments.getApportionmentMethod());
     }
 
+}
+
+/**
     @Test
     void getRepresentationFormat_default() {
         String[] args = {"populations.csv"};

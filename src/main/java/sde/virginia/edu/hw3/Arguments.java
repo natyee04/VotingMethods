@@ -171,6 +171,23 @@ public class Arguments {
      */
     public ApportionmentMethod getApportionmentMethod() {
         ApportionmentMethodFactory factory = new ApportionmentMethodFactory();
+        String shortOption = "-m";
+        String longOption = "--method";
+
+        bothOptionsArePresent(shortOption, longOption);
+        optionOccurrences(longOption);
+        optionOccurrences(shortOption);
+
+        if (arguments.contains(shortOption) || arguments.contains(longOption)) {
+            String option = setToPresentedOption(shortOption, longOption);
+
+            isTheOptionTheLastArgument(option);
+
+            var targetMethod = arguments.get(arguments.indexOf(option) + 1);
+
+            return factory.getMethod(targetMethod);
+        }
+
         return factory.getDefaultMethod();
     }
 
