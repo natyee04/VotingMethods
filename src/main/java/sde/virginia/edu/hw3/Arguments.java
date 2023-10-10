@@ -5,6 +5,7 @@
 package sde.virginia.edu.hw3;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
 import org.apache.commons.cli.*;
 
@@ -154,6 +155,9 @@ public class Arguments {
         catch (NumberFormatException e) {
             throw new NumberFormatException("Given value for representatives is not a number.");
         }
+        catch (NullPointerException e) {
+            throw new NullPointerException("An argument was not provide for representatives.");
+        }
 
         return DEFAULT_REPRESENTATIVE_COUNT;
     }
@@ -169,8 +173,16 @@ public class Arguments {
     public ApportionmentMethod getApportionmentMethod() {
         ApportionmentMethodFactory factory = new ApportionmentMethodFactory();
 
-        if (line.hasOption("method")) {
-            return factory.getMethod(line.getOptionValue("method"));
+        try {
+            if (line.hasOption("method")) {
+                if (line.getOptionValue("method") == null) {
+                    throw new NullPointerException("No argument was given for method");
+                }
+                return factory.getMethod(line.getOptionValue("method"));
+            }
+        }
+        catch (NullPointerException e) {
+            throw new NullPointerException("An argument was not provide for method.");
         }
 
         return factory.getDefaultMethod();
@@ -197,22 +209,31 @@ public class Arguments {
             throw new IllegalArgumentException("Cannot sort the format by both ascending and descending.");
         }
 
-        if (line.hasOption("format")) {
-            var methodName = line.getOptionValue("format");
+        try {
+            if (line.hasOption("format")) {
+                if (line.getOptionValue("format") == null) {
+                    throw new NullPointerException("No argument was given for format");
+                }
 
-            if (methodName.equalsIgnoreCase("alphabet")) {
-                return factory.getDefaultFormat();
+                var methodName = line.getOptionValue("format");
+
+                if (methodName.equalsIgnoreCase("alphabet")) {
+                    return factory.getDefaultFormat();
+                }
+
+                if (line.hasOption("ascending")) {
+                    return factory.getFormat(methodName, DisplayOrder.ASCENDING);
+                }
+
+                if (line.hasOption("descending")) {
+                    return factory.getFormat(methodName, DisplayOrder.DESCENDING);
+                }
+
+                return factory.getFormat(methodName);
             }
-
-            if (line.hasOption("ascending")) {
-                return factory.getFormat(methodName, DisplayOrder.ASCENDING);
-            }
-
-            if (line.hasOption("descending")) {
-                return factory.getFormat(methodName, DisplayOrder.DESCENDING);
-            }
-
-            return factory.getFormat(methodName);
+        }
+        catch (NullPointerException e) {
+            throw new NullPointerException("An argument was not provide for method.");
         }
 
         return factory.getDefaultFormat();
