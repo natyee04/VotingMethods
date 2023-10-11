@@ -4,6 +4,7 @@
 
 package sde.virginia.edu.hw3;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
@@ -205,9 +206,67 @@ public class Arguments {
      * used.
      * @see Main#main(String[])
      */
+
+    public ArrayList<Object> displayOrderGiven() {
+        ArrayList<Object> result = new ArrayList<>();
+
+        String shortOptionA = "-a";
+        String longOptionA = "--ascending";
+        String shortOptionD = "-d";
+        String longOptionD = "--descending";
+
+        bothOptionsArePresent(shortOptionA, longOptionA);
+        bothOptionsArePresent(shortOptionD, longOptionD);
+        bothOptionsArePresent(shortOptionD, longOptionA);
+        bothOptionsArePresent(shortOptionA, longOptionD);
+        optionOccurrences(longOptionA);
+        optionOccurrences(longOptionD);
+        optionOccurrences(shortOptionA);
+        optionOccurrences(shortOptionD);
+
+        if (arguments.contains(shortOptionA) || arguments.contains(longOptionA)) {
+            result.add(true);
+            result.add(DisplayOrder.ASCENDING);
+
+            return result;
+        }
+        if (arguments.contains(shortOptionD) || arguments.contains(longOptionD)) {
+                result.add(true);
+                result.add(DisplayOrder.DESCENDING);
+
+                return result;
+            }
+
+        result.add(false);
+        return result;
+    }
     public RepresentationFormat getRepresentationFormat() {
         RepresentationFormatFactory factory = new RepresentationFormatFactory();
 
+        String shortOption = "-f";
+        String longOption = "--format";
+
+        bothOptionsArePresent(shortOption, longOption);
+        optionOccurrences(longOption);
+        optionOccurrences(shortOption);
+
+        if (arguments.contains(shortOption) || arguments.contains(longOption)) {
+            String option = setToPresentedOption(shortOption, longOption);
+
+            isTheOptionTheLastArgument(option);
+
+            var targetFormat = arguments.get(arguments.indexOf(option) + 1);
+
+            if (targetFormat.equals("alphabet")) {
+                return factory.getFormat(targetFormat);
+            }
+
+            if ((boolean) displayOrderGiven().get(0)) {
+                return factory.getFormat(targetFormat, (DisplayOrder) displayOrderGiven().get(1));
+            }
+
+            return factory.getFormat(targetFormat);
+        }
 
         return factory.getDefaultFormat();
     }

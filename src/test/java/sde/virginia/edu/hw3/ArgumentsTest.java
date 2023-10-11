@@ -154,9 +154,6 @@ class ArgumentsTest {
         assertInstanceOf(HuntingtonHillMethod.class, arguments.getApportionmentMethod());
     }
 
-}
-
-/**
     @Test
     void getRepresentationFormat_default() {
         String[] args = {"populations.csv"};
@@ -198,8 +195,14 @@ class ArgumentsTest {
         Arguments arguments = new Arguments(args);
         assertInstanceOf(PopulationFormat.class, arguments.getRepresentationFormat());
     }
+
+    @Test
+    void getRepresentationFormat_populationFormat_ascendingLongOption() {
+        String[] args = {"populations.csv", "-d", "--format", "population"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(PopulationFormat.class, arguments.getRepresentationFormat());
+    }
 }
-*/
 /*
  * Copyright (c) 2023. Paul "Will" McBurney <br>
  *
