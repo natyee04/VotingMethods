@@ -217,6 +217,8 @@ public class Arguments {
 
         bothOptionsArePresent(shortOptionA, longOptionA);
         bothOptionsArePresent(shortOptionD, longOptionD);
+        bothOptionsArePresent(shortOptionD, shortOptionA);
+        bothOptionsArePresent(longOptionA, longOptionD);
         bothOptionsArePresent(shortOptionD, longOptionA);
         bothOptionsArePresent(shortOptionA, longOptionD);
         optionOccurrences(longOptionA);
@@ -250,6 +252,8 @@ public class Arguments {
         optionOccurrences(longOption);
         optionOccurrences(shortOption);
 
+        var displayArray = displayOrderGiven();
+
         if (arguments.contains(shortOption) || arguments.contains(longOption)) {
             String option = setToPresentedOption(shortOption, longOption);
 
@@ -261,8 +265,8 @@ public class Arguments {
                 return factory.getFormat(targetFormat);
             }
 
-            if ((boolean) displayOrderGiven().get(0)) {
-                return factory.getFormat(targetFormat, (DisplayOrder) displayOrderGiven().get(1));
+            if ((boolean) displayArray.get(0)) {
+                return factory.getFormat(targetFormat, (DisplayOrder) displayArray.get(1));
             }
 
             return factory.getFormat(targetFormat);
