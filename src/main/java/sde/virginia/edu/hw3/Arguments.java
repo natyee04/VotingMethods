@@ -4,10 +4,12 @@
 
 package sde.virginia.edu.hw3;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.List;
+import java.io.CharConversionException;
+import java.io.SyncFailedException;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.apache.commons.cli.*;
 
 
@@ -50,7 +52,7 @@ public class Arguments {
      * The number of representatives in the US House of Representatives since 1913
      */
     public static final int DEFAULT_REPRESENTATIVE_COUNT = 435;
-    private final List<String> arguments;
+    private List<String> arguments;
     private final List<String> longOptions = Arrays.asList("--representatives", "--format", "--method", "--ascending", "--descending");
     private final List<String> shortOptions = Arrays.asList("-r", "-f", "-m", "-a", "-d");
     /**
@@ -66,16 +68,131 @@ public class Arguments {
         }
 
         arguments = Arrays.asList(args);
+        ArrayList<String> temp = new ArrayList<>();
 
-        for (String options : arguments) {
 
+        ArrayList<String> modifiedArguments = new ArrayList<>();
+
+        for (String options: arguments) {
             if (options.startsWith("--") && !longOptions.contains(options)) {
                 throw new IllegalArgumentException("Cannot have invalid long command option(s).");
             }
-            else if (options.startsWith("-") && !options.matches("-?\\d+(\\.\\d+)?") && !shortOptions.contains(options) && options.charAt(1) != '-') {
-                throw new IllegalArgumentException("Cannot have invalid short command option(s).");
-            }
         }
+
+        for (String options : arguments) {
+            if (options.startsWith("-") && !options.matches("-?\\d+(\\.\\d+)?") && options.charAt(1) != '-') {
+                System.out.println("the option: " + options);
+
+                if (options.length() > 2) {
+
+                    HashMap<Integer, String> combineArguments = new HashMap<>();
+                    HashMap<Integer, String> combineOptions= new HashMap<>();
+
+                    ArrayList<String> deconstructedCombinedOptions = new ArrayList<>();
+
+                    System.out.println("the option: " + options);
+                    var optionWithoutDash = options.substring(1);
+
+                    boolean allOptionsAreValid = optionWithoutDash.chars().allMatch(shortCommand -> shortOptions.contains("-" + Character.toString((char) shortCommand)));
+
+                    boolean ascendingFlag = options.chars().anyMatch(shortCommand -> Character.toString((char) shortCommand).equals("a"));
+                    boolean descendingFlag = options.chars().anyMatch(shortCommand -> Character.toString((char) shortCommand).equals("d"));
+
+                    int combinedOptionsIndex = arguments.indexOf(options);
+                    System.out.println("the option index: " + combinedOptionsIndex);
+
+                    if (allOptionsAreValid) {
+                        int endOfOptionArgumentsIndex;
+
+                        int index = 0;
+                        for (char c : optionWithoutDash.toCharArray()) {
+                            System.out.println("This is the letter: "+ c);
+                            if (c == 'a' || c == 'd') {
+                                combineOptions.put(-1, "-"+Character.toString(c));
+                                System.out.println("ordering: " +combineOptions.get(index));
+                            }
+                            else {
+                                combineOptions.put(index, "-" + Character.toString(c));
+                            }
+
+                            System.out.println("combined options hash: ");
+                            System.out.println(combineOptions.get(index));
+                            index++;
+                        }
+
+
+                        try {
+                             if (descendingFlag || ascendingFlag) {
+                                 endOfOptionArgumentsIndex = combinedOptionsIndex + options.length() - 2;
+                             }
+                             else {
+                                 endOfOptionArgumentsIndex = combinedOptionsIndex + options.length() - 1;
+                             }
+
+                            index= 0;
+                            for (int j = combinedOptionsIndex + 1; j <= endOfOptionArgumentsIndex; j++) {
+                                combineArguments.put(index, arguments.get(j));
+                                System.out.println("combined arg hash: ");
+                                System.out.println(combineArguments.get(index));
+
+                                index++;
+                            }
+
+                            List<String> sub = arguments.subList(combinedOptionsIndex, endOfOptionArgumentsIndex + 1);
+
+                            for (int j = 0; j < arguments.size(); j++){
+                                if(!sub.contains(arguments.get(j))) {
+                                    modifiedArguments.add(arguments.get(j));
+                                }
+                            }
+
+                            System.out.println("modified: ");
+                            modifiedArguments.forEach(System.out::println);
+
+
+
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            throw new ArrayIndexOutOfBoundsException("Missing arguments for the combined short-hand commands.");
+                        }
+
+
+                        for (int key: combineOptions.keySet()) {
+                            deconstructedCombinedOptions.add(combineOptions.get(key));
+                            deconstructedCombinedOptions.add(combineArguments.get(key));
+                        }
+
+                        if (deconstructedCombinedOptions.contains(null)) {
+                            deconstructedCombinedOptions.remove(null);
+                        }
+
+                        System.out.println("deconstructed: ");
+                        deconstructedCombinedOptions.forEach(System.out::print);
+
+                        index = 0;
+                        for (int j = combinedOptionsIndex; j < combinedOptionsIndex + deconstructedCombinedOptions.size(); j++) {
+                            modifiedArguments.add(j, deconstructedCombinedOptions.get(index));
+
+                            index++;
+                        }
+
+                        System.out.println("\nModified with deconstructed: ");
+                        modifiedArguments.forEach(System.out::println);
+
+                    }
+
+               }
+                else if(!shortOptions.contains(options)){
+                    throw new IllegalArgumentException("Cannot have invalid short command option(s).");
+                }
+            }
+
+
+
+
+            //modifiedArguments.forEach(System.out::println);
+        }
+
+        //arguments.forEach(System.out::println);
     }
 
     /**
