@@ -96,7 +96,6 @@ public class Arguments {
 
                         int index = 0;
                         for (char c : optionWithoutDash.toCharArray()) {
-                            System.out.println("This is the letter: "+ c);
                             if (c == 'a' || c == 'd') {
                                 combineOptions.put(-1, "-"+c);
                             }

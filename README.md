@@ -5,11 +5,11 @@
 ## Authors
 1) Rebecca Wu, nxh9rk, nxh9rk 
 2) Natalie Yee, nvn5yn, natyee04
-3) Name, netid, [GitHub profile name]
+3) Eva Fong, xsg5by, imthatpiggy
 
 ## To Run
 
-[Add a brief description of how to build and run your .jar file based on this code]
+To run this file, you must first 
 
 ## Contributions
 
@@ -27,7 +27,7 @@ List the primary contributions of each author. It is recommended to update this 
 * as a bulleted list
 * each line starts with an asterisk and a space
 
-### [Author 3 - replace this with their name]
+### Eva Fong
 
 * Author 3 contributions
 * as a bulleted list
