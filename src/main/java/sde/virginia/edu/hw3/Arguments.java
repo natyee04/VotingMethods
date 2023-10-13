@@ -4,13 +4,7 @@
 
 package sde.virginia.edu.hw3;
 
-import java.io.CharConversionException;
-import java.io.SyncFailedException;
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.stream.Collectors;
-
-import org.apache.commons.cli.*;
 
 
 /**
@@ -53,7 +47,6 @@ public class Arguments {
      */
     public static final int DEFAULT_REPRESENTATIVE_COUNT = 435;
     private List<String> arguments;
-    private final List<String> longOptions = Arrays.asList("--representatives", "--format", "--method", "--ascending", "--descending");
     private final List<String> shortOptions = Arrays.asList("-r", "-f", "-m", "-a", "-d");
     /**
      * Constructor for {@link Arguments}
@@ -73,6 +66,7 @@ public class Arguments {
         List<String> modifiedArguments = new ArrayList<>();
 
         for (String options: arguments) {
+            List<String> longOptions = Arrays.asList("--representatives", "--format", "--method", "--ascending", "--descending");
             if (options.startsWith("--") && !longOptions.contains(options)) {
                 throw new IllegalArgumentException("Cannot have invalid long command option(s).");
             }
@@ -90,7 +84,7 @@ public class Arguments {
 
                     var optionWithoutDash = options.substring(1);
 
-                    boolean allOptionsAreValid = optionWithoutDash.chars().allMatch(shortCommand -> shortOptions.contains("-" + Character.toString((char) shortCommand)));
+                    boolean allOptionsAreValid = optionWithoutDash.chars().allMatch(shortCommand -> shortOptions.contains("-" + ((char) shortCommand)));
 
                     boolean ascendingFlag = options.chars().anyMatch(shortCommand -> Character.toString((char) shortCommand).equals("a"));
                     boolean descendingFlag = options.chars().anyMatch(shortCommand -> Character.toString((char) shortCommand).equals("d"));
@@ -104,10 +98,10 @@ public class Arguments {
                         for (char c : optionWithoutDash.toCharArray()) {
                             System.out.println("This is the letter: "+ c);
                             if (c == 'a' || c == 'd') {
-                                combineOptions.put(-1, "-"+Character.toString(c));
+                                combineOptions.put(-1, "-"+c);
                             }
                             else {
-                                combineOptions.put(index, "-" + Character.toString(c));
+                                combineOptions.put(index, "-" + c);
                             }
 
                             index++;
@@ -131,9 +125,9 @@ public class Arguments {
 
                             List<String> sub = arguments.subList(combinedOptionsIndex, endOfOptionArgumentsIndex + 1);
 
-                            for (int j = 0; j < arguments.size(); j++){
-                                if(!sub.contains(arguments.get(j))) {
-                                    modifiedArguments.add(arguments.get(j));
+                            for (String argument : arguments) {
+                                if (!sub.contains(argument)) {
+                                    modifiedArguments.add(argument);
                                 }
                             }
 
@@ -147,9 +141,7 @@ public class Arguments {
                             deconstructedCombinedOptions.add(combineArguments.get(key));
                         }
 
-                        if (deconstructedCombinedOptions.contains(null)) {
                             deconstructedCombinedOptions.remove(null);
-                        }
 
                         index = 0;
                         for (int j = combinedOptionsIndex; j < combinedOptionsIndex + deconstructedCombinedOptions.size(); j++) {
@@ -183,31 +175,20 @@ public class Arguments {
      * @throws UnsupportedFileFormatException if an invalid filename argument is provided
      */
     public StateSupplier getStateSupplier() {
-        StateSupplier supplier = new StateSupplierFactory().getStateSupplier(arguments.get(0));
-
-        return supplier;
+        return new StateSupplierFactory().getStateSupplier(arguments.get(0));
     }
 
-    /**
-     * Determine the number of representatives to allocate form the command-line arguments.
-     *
-     * @return the number of representatives to allocate, based on the command-line arguments. If
-     * <code>[representatives]</code> is not specified, then {@link Arguments#DEFAULT_REPRESENTATIVE_COUNT return the
-     * default number of representatives}.
-     *
-     * @see Main#main(String[])
-     */
 
     public void bothOptionsArePresent(String shortOption, String longOption) {
         if (arguments.contains(shortOption) && arguments.contains(longOption)) {
             throw new IllegalArgumentException("Cannot have both " + shortOption + " and " + longOption + ".");
-        };
+        }
     }
 
     public void optionOccurrences(String option) {
         if (arguments.stream().filter(arguments -> arguments.equals(option)).count() > 1) {
             throw new IllegalArgumentException("Cannot have multiple " + option + ".");
-        };
+        }
     }
 
     public void isTheOptionTheLastArgument(String option) {
@@ -222,6 +203,15 @@ public class Arguments {
         }
             return longOption;
     }
+    /**
+     * Determine the number of representatives to allocate form the command-line arguments.
+     *
+     * @return the number of representatives to allocate, based on the command-line arguments. If
+     * <code>[representatives]</code> is not specified, then {@link Arguments#DEFAULT_REPRESENTATIVE_COUNT return the
+     * default number of representatives}.
+     *
+     * @see Main#main(String[])
+     */
 
     public int getRepresentatives() {
 
