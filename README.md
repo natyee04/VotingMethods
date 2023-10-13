@@ -30,7 +30,8 @@ List the primary contributions of each author. It is recommended to update this 
 
 * Wrote factory classes for State Supplier, Apportionment Method, and Representation Format.
 * Parsed through the command line options and performed the necessary functions associated with the options. 
-* Rewrote ArgumentsTest to accomodate the changes made to Arguments class.
+* Rewrote ArgumentsTest to accommodate the changes made to Arguments class.
+* Answered Question 2 of QUESTIONS.md.
 
 ## Issues
 
