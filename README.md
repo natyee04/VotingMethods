@@ -17,15 +17,14 @@ List the primary contributions of each author. It is recommended to update this 
 
 ### Rebecca Wu
 
-* Author 1 contributions
-* as a bulleted list
-* each line starts with an asterisk and a space
+* implemented part 2
+* testing
 
 ### Natalie Yee
 
-* Author 2 contributions
-* as a bulleted list
-* each line starts with an asterisk and a space
+* implemented part 1
+* testing
+* question 1 in QUESTIONS.md
 
 ### Eva Fong
 
