@@ -4,8 +4,7 @@
 
 package sde.virginia.edu.hw3;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -47,8 +46,8 @@ public class Arguments {
      * The number of representatives in the US House of Representatives since 1913
      */
     public static final int DEFAULT_REPRESENTATIVE_COUNT = 435;
-    private final List<String> arguments;
-
+    private List<String> arguments;
+    private final List<String> shortOptions = Arrays.asList("-r", "-f", "-m", "-a", "-d");
     /**
      * Constructor for {@link Arguments}
      *
@@ -60,7 +59,107 @@ public class Arguments {
                     This program requires command line arguments:
                        java -jar Apportionment.jar <filename.csv> [number of representatives to allocate]""");
         }
+
         arguments = Arrays.asList(args);
+
+
+        List<String> modifiedArguments = new ArrayList<>();
+
+        for (String options: arguments) {
+            List<String> longOptions = Arrays.asList("--representatives", "--format", "--method", "--ascending", "--descending");
+            if (options.startsWith("--") && !longOptions.contains(options)) {
+                throw new IllegalArgumentException("Cannot have invalid long command option(s).");
+            }
+        }
+
+        for (String options : arguments) {
+            if (options.startsWith("-") && !options.matches("-?\\d+(\\.\\d+)?") && options.charAt(1) != '-') {
+
+                if (options.length() > 2) {
+
+                    HashMap<Integer, String> combineArguments = new HashMap<>();
+                    HashMap<Integer, String> combineOptions= new HashMap<>();
+
+                    List<String> deconstructedCombinedOptions = new ArrayList<>();
+
+                    var optionWithoutDash = options.substring(1);
+
+                    boolean allOptionsAreValid = optionWithoutDash.chars().allMatch(shortCommand -> shortOptions.contains("-" + ((char) shortCommand)));
+
+                    boolean ascendingFlag = options.chars().anyMatch(shortCommand -> Character.toString((char) shortCommand).equals("a"));
+                    boolean descendingFlag = options.chars().anyMatch(shortCommand -> Character.toString((char) shortCommand).equals("d"));
+
+                    int combinedOptionsIndex = arguments.indexOf(options);
+
+                    if (allOptionsAreValid) {
+                        int endOfOptionArgumentsIndex;
+
+                        int index = 0;
+                        for (char c : optionWithoutDash.toCharArray()) {
+                            if (c == 'a' || c == 'd') {
+                                combineOptions.put(-1, "-"+c);
+                            }
+                            else {
+                                combineOptions.put(index, "-" + c);
+                            }
+
+                            index++;
+                        }
+
+
+                        try {
+                             if (descendingFlag || ascendingFlag) {
+                                 endOfOptionArgumentsIndex = combinedOptionsIndex + options.length() - 2;
+                             }
+                             else {
+                                 endOfOptionArgumentsIndex = combinedOptionsIndex + options.length() - 1;
+                             }
+
+                            index= 0;
+                            for (int j = combinedOptionsIndex + 1; j <= endOfOptionArgumentsIndex; j++) {
+                                combineArguments.put(index, arguments.get(j));
+
+                                index++;
+                            }
+
+                            List<String> sub = arguments.subList(combinedOptionsIndex, endOfOptionArgumentsIndex + 1);
+
+                            for (String argument : arguments) {
+                                if (!sub.contains(argument)) {
+                                    modifiedArguments.add(argument);
+                                }
+                            }
+
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            throw new ArrayIndexOutOfBoundsException("Missing arguments for the combined short-hand commands.");
+                        }
+
+
+                        for (int key: combineOptions.keySet()) {
+                            deconstructedCombinedOptions.add(combineOptions.get(key));
+                            deconstructedCombinedOptions.add(combineArguments.get(key));
+                        }
+
+                            deconstructedCombinedOptions.remove(null);
+
+                        index = 0;
+                        for (int j = combinedOptionsIndex; j < combinedOptionsIndex + deconstructedCombinedOptions.size(); j++) {
+                            modifiedArguments.add(j, deconstructedCombinedOptions.get(index));
+
+                            index++;
+                        }
+
+
+                        arguments = new ArrayList<>(modifiedArguments);
+                    }
+
+               }
+                else if(!shortOptions.contains(options)){
+                    throw new IllegalArgumentException("Cannot have invalid short command option(s).");
+                }
+
+            }
+        }
     }
 
     /**
@@ -75,16 +174,34 @@ public class Arguments {
      * @throws UnsupportedFileFormatException if an invalid filename argument is provided
      */
     public StateSupplier getStateSupplier() {
-        var filename = arguments.get(0);
-        if (filename.toLowerCase().endsWith("csv")) {
-            return new CSVStateReader(filename);
-        }
-        if (filename.toLowerCase().endsWith("xlsx") || filename.toLowerCase().endsWith("xls")) {
-            return new SpreadsheetStateReader(filename);
-        }
-        throw new UnsupportedFileFormatException(filename);
+        return new StateSupplierFactory().getStateSupplier(arguments.get(0));
     }
 
+
+    public void bothOptionsArePresent(String shortOption, String longOption) {
+        if (arguments.contains(shortOption) && arguments.contains(longOption)) {
+            throw new IllegalArgumentException("Cannot have both " + shortOption + " and " + longOption + ".");
+        }
+    }
+
+    public void optionOccurrences(String option) {
+        if (arguments.stream().filter(arguments -> arguments.equals(option)).count() > 1) {
+            throw new IllegalArgumentException("Cannot have multiple " + option + ".");
+        }
+    }
+
+    public void isTheOptionTheLastArgument(String option) {
+        if (arguments.indexOf(option) == arguments.size() - 1) {
+            throw new IllegalArgumentException("No value was given for the command " + option + ".");
+        }
+    }
+
+    public String setToPresentedOption(String shortOption, String longOption) {
+        if (arguments.contains(shortOption)) {
+            return shortOption;
+        }
+            return longOption;
+    }
     /**
      * Determine the number of representatives to allocate form the command-line arguments.
      *
@@ -94,20 +211,37 @@ public class Arguments {
      *
      * @see Main#main(String[])
      */
-    public int getRepresentatives() {
-        if (arguments.size() == 1) {
-            return DEFAULT_REPRESENTATIVE_COUNT;
-        }
 
-        try {
-            var targetRepresentatives = Integer.parseInt(arguments.get(1));
-            if (targetRepresentatives <= 0) {
-                throw new IllegalArgumentException("Number of representatives argument must be a positive integer.");
-            }
-            return targetRepresentatives;
-        } catch (NumberFormatException e) {
-            return DEFAULT_REPRESENTATIVE_COUNT;
-        }
+    public int getRepresentatives() {
+
+        String shortOption = "-r";
+        String longOption = "--representatives";
+
+       bothOptionsArePresent(shortOption, longOption);
+       optionOccurrences(longOption);
+       optionOccurrences(shortOption);
+
+       try {
+           if (arguments.contains(shortOption) || arguments.contains(longOption)) {
+               String option = setToPresentedOption(shortOption, longOption);
+
+               isTheOptionTheLastArgument(option);
+
+               var targetRepresentatives = Integer.parseInt(arguments.get(arguments.indexOf(option) + 1));
+
+               if (targetRepresentatives <= 0) {
+                   throw new IllegalArgumentException("Number of representatives argument must be a positive integer.");
+               }
+               return targetRepresentatives;
+           }
+
+       } catch (NumberFormatException e) {
+           throw new NumberFormatException("The given value for representatives is not a number.");
+       } catch (NullPointerException e) {
+           throw new NullPointerException("No value is given for the representatives.");
+       }
+
+        return DEFAULT_REPRESENTATIVE_COUNT;
     }
 
     /**
@@ -119,10 +253,25 @@ public class Arguments {
      * @see Main#main(String[])
      */
     public ApportionmentMethod getApportionmentMethod() {
-        if (arguments.contains("--adams")) {
-            return new AdamsMethod();
+        ApportionmentMethodFactory factory = new ApportionmentMethodFactory();
+        String shortOption = "-m";
+        String longOption = "--method";
+
+        bothOptionsArePresent(shortOption, longOption);
+        optionOccurrences(longOption);
+        optionOccurrences(shortOption);
+
+        if (arguments.contains(shortOption) || arguments.contains(longOption)) {
+            String option = setToPresentedOption(shortOption, longOption);
+
+            isTheOptionTheLastArgument(option);
+
+            var targetMethod = arguments.get(arguments.indexOf(option) + 1);
+
+            return factory.getMethod(targetMethod);
         }
-        return new JeffersonMethod();
+
+        return factory.getDefaultMethod();
     }
 
     /**
@@ -139,14 +288,73 @@ public class Arguments {
      * used.
      * @see Main#main(String[])
      */
-    public RepresentationFormat getRepresentationFormat() {
-        if (arguments.contains("--population")) {
-            if (arguments.contains("-d") || arguments.contains("--descending")) {
-                return new PopulationFormat(DisplayOrder.DESCENDING);
-            }
-            return new PopulationFormat(DisplayOrder.ASCENDING);
+
+    public ArrayList<Object> displayOrderGiven() {
+        ArrayList<Object> result = new ArrayList<>();
+
+        String shortOptionA = "-a";
+        String longOptionA = "--ascending";
+        String shortOptionD = "-d";
+        String longOptionD = "--descending";
+
+        bothOptionsArePresent(shortOptionA, longOptionA);
+        bothOptionsArePresent(shortOptionD, longOptionD);
+        bothOptionsArePresent(shortOptionD, shortOptionA);
+        bothOptionsArePresent(longOptionA, longOptionD);
+        bothOptionsArePresent(shortOptionD, longOptionA);
+        bothOptionsArePresent(shortOptionA, longOptionD);
+        optionOccurrences(longOptionA);
+        optionOccurrences(longOptionD);
+        optionOccurrences(shortOptionA);
+        optionOccurrences(shortOptionD);
+
+        if (arguments.contains(shortOptionA) || arguments.contains(longOptionA)) {
+            result.add(true);
+            result.add(DisplayOrder.ASCENDING);
+
+            return result;
         }
-        return new AlphabeticalFormat();
+        if (arguments.contains(shortOptionD) || arguments.contains(longOptionD)) {
+                result.add(true);
+                result.add(DisplayOrder.DESCENDING);
+
+                return result;
+            }
+
+        result.add(false);
+        return result;
+    }
+    public RepresentationFormat getRepresentationFormat() {
+        RepresentationFormatFactory factory = new RepresentationFormatFactory();
+
+        String shortOption = "-f";
+        String longOption = "--format";
+
+        bothOptionsArePresent(shortOption, longOption);
+        optionOccurrences(longOption);
+        optionOccurrences(shortOption);
+
+        var displayArray = displayOrderGiven();
+
+        if (arguments.contains(shortOption) || arguments.contains(longOption)) {
+            String option = setToPresentedOption(shortOption, longOption);
+
+            isTheOptionTheLastArgument(option);
+
+            var targetFormat = arguments.get(arguments.indexOf(option) + 1);
+
+            if (targetFormat.equals("alphabet")) {
+                return factory.getFormat(targetFormat);
+            }
+
+            if ((boolean) displayArray.get(0)) {
+                return factory.getFormat(targetFormat, (DisplayOrder) displayArray.get(1));
+            }
+
+            return factory.getFormat(targetFormat);
+        }
+
+        return factory.getDefaultFormat();
     }
 }
 

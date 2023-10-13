@@ -22,36 +22,43 @@ class ArgumentsTest {
         assertThrows(IllegalArgumentException.class, () -> new Arguments(args));
     }
 
+    private String getResource(String resourceName) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        try {
+            return Objects.requireNonNull(classLoader.getResource(resourceName)).toURI().getPath();
+        } catch (Exception e) {
+            throw new RuntimeException("Error! The resource was unable to be loaded.");
+        }
+    }
+
     @Test
     void getStateSupplier_csv() {
-        var classLoader = CSVStateReaderTest.class.getClassLoader();
-        var filename = Objects.requireNonNull(classLoader.getResource("mixedColumns.csv")).getFile();
-        var args = new String[] {filename};
+        var filename = getResource("mixedColumns.csv");
+        var args = new String[]{filename};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(CSVStateReader.class, arguments.getStateSupplier());
     }
 
     @Test
     void getStateSupplier_xls() {
-        var classLoader = CSVStateReaderTest.class.getClassLoader();
-        var filename = Objects.requireNonNull(classLoader.getResource("excelExampleNormal.xls")).getFile();
-        var args = new String[] {filename};
+        var filename = getResource("excelExampleNormal.xls");
+        var args = new String[]{filename};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(SpreadsheetStateReader.class, arguments.getStateSupplier());
+
     }
 
     @Test
     void getStateSupplier_xlsx() {
-        var classLoader = CSVStateReaderTest.class.getClassLoader();
-        var filename = Objects.requireNonNull(classLoader.getResource("excelExampleNormal.xlsx")).getFile();
-        var args = new String[] {filename};
+        var filename = getResource("excelExampleNormal.xlsx");
+        var args = new String[]{filename};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(SpreadsheetStateReader.class, arguments.getStateSupplier());
     }
 
     @Test
     void getStateSupplier_fileNotFound() {
-        var args = new String[] {"notARealFile.csv"};
+        var args = new String[]{"notARealFile.csv"};
         Arguments arguments = new Arguments(args);
         assertThrows(IllegalArgumentException.class, arguments::getStateSupplier);
     }
@@ -64,45 +71,87 @@ class ArgumentsTest {
     }
 
     @Test
-    void getRepresentatives_twoArgs() {
-        String[] args = {"populations.csv", "25"};
+    void getRepresentatives_twoArgs_longOption() {
+        String[] args = {"populations.csv", "--representatives", "25"};
         Arguments arguments = new Arguments(args);
         assertEquals(25, arguments.getRepresentatives());
     }
 
     @Test
+    void getRepresentatives_twoArgs_shortOption() {
+        String[] args = {"populations.csv", "-r", "5"};
+        Arguments arguments = new Arguments(args);
+        assertEquals(5, arguments.getRepresentatives());
+    }
+
+    @Test
     void getRepresentatives_negativeArg() {
-        String[] args = {"populations.csv", "-25"};
+        String[] args = {"populations.csv", "--representatives", "-25"};
         Arguments arguments = new Arguments(args);
         assertThrows(IllegalArgumentException.class, arguments::getRepresentatives);
     }
 
     @Test
     void getRepresentatives_nonNumber() {
-        String[] args = {"populations.csv", "some string"};
+        String[] args = {"populations.csv", "--representatives", "some string"};
         Arguments arguments = new Arguments(args);
-        assertEquals(435, arguments.getRepresentatives());
+        assertThrows(NumberFormatException.class, arguments::getRepresentatives);
     }
 
     @Test
-    void getApportionmentMethod_Adams_noRepCount() {
-        String[] args = {"populations.csv", "--adams"};
+    void getRepresentatives_multipleLongOption() {
+        String[] args = {"populations.csv", "--representatives", "--representatives", "23"};
+        Arguments arguments = new Arguments(args);
+        assertThrows(IllegalArgumentException.class, arguments::getRepresentatives);
+    }
+
+    @Test
+    void getRepresentatives_multipleShortOption() {
+        String[] args = {"populations.csv", "-r", "-r", "23"};
+        Arguments arguments = new Arguments(args);
+        assertThrows(IllegalArgumentException.class, arguments::getRepresentatives);
+    }
+
+    @Test
+    void getApportionmentMethod_Adams_noRepCount_longOption() {
+        String[] args = {"populations.csv", "--method", "adams"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(AdamsMethod.class, arguments.getApportionmentMethod());
+    }
+
+    @Test
+    void getApportionmentMethod_Adams_noRepCount_shortOption() {
+        String[] args = {"populations.csv", "-m", "adams"};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(AdamsMethod.class, arguments.getApportionmentMethod());
     }
 
     @Test
     void getApportionmentMethod_Adams_withRepCount() {
-        String[] args = {"populations.csv", "400", "--adams"};
+        String[] args = {"populations.csv", "--representatives", "300", "--method", "adams"};
         Arguments arguments = new Arguments(args);
         assertInstanceOf(AdamsMethod.class, arguments.getApportionmentMethod());
+    }
+
+    @Test
+    void getApportionmentMethod_HuntingtonHillMethod_withRepCount() {
+        String[] args = {"populations.csv", "--representatives", "300", "--method", "huntington"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(HuntingtonHillMethod.class, arguments.getApportionmentMethod());
+    }
+
+    @Test
+    void getApportionmentMethod_JeffersonMethod_withRepCount() {
+        String[] args = {"populations.csv", "--representatives", "300", "--method", "jefferson"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(JeffersonMethod.class, arguments.getApportionmentMethod());
     }
 
     @Test
     void getApportionmentMethod_default() {
         String[] args = {"populations.csv"};
         Arguments arguments = new Arguments(args);
-        assertInstanceOf(JeffersonMethod.class, arguments.getApportionmentMethod());
+        assertInstanceOf(HuntingtonHillMethod.class, arguments.getApportionmentMethod());
     }
 
     @Test
@@ -113,13 +162,47 @@ class ArgumentsTest {
     }
 
     @Test
-    void getRepresentationFormat_populationAscending() {
-        String[] args = {"populations.csv"};
+    void getRepresentationFormat_benefitFormat_longOption() {
+        String[] args = {"populations.csv", "--format", "benefit"};
         Arguments arguments = new Arguments(args);
-        assertInstanceOf(AlphabeticalFormat.class, arguments.getRepresentationFormat());
+        assertInstanceOf(BenefitFormat.class, arguments.getRepresentationFormat());
+    }
+
+    @Test
+    void getRepresentationFormat_benefitFormat_shortOption() {
+        String[] args = {"populations.csv", "-f", "benefit"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(BenefitFormat.class, arguments.getRepresentationFormat());
+    }
+
+    @Test
+    void getRepresentationFormat_benefitFormat_ascendingLongOption() {
+        String[] args = {"populations.csv", "-f", "benefit", "--ascending"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(BenefitFormat.class, arguments.getRepresentationFormat());
+    }
+
+    @Test
+    void getRepresentationFormat_benefitFormat_ascendingShortOption() {
+        String[] args = {"populations.csv", "-a", "-f", "benefit"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(BenefitFormat.class, arguments.getRepresentationFormat());
+    }
+
+    @Test
+    void getRepresentationFormat_populationFormat_descendingShortOption() {
+        String[] args = {"populations.csv", "-d", "-f", "population"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(PopulationFormat.class, arguments.getRepresentationFormat());
+    }
+
+    @Test
+    void getRepresentationFormat_populationFormat_ascendingLongOption() {
+        String[] args = {"populations.csv", "-d", "--format", "population"};
+        Arguments arguments = new Arguments(args);
+        assertInstanceOf(PopulationFormat.class, arguments.getRepresentationFormat());
     }
 }
-
 /*
  * Copyright (c) 2023. Paul "Will" McBurney <br>
  *

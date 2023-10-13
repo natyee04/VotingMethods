@@ -5,11 +5,11 @@
 ## Authors
 1) Rebecca Wu, nxh9rk, nxh9rk 
 2) Natalie Yee, nvn5yn, natyee04
-3) Name, netid, [GitHub profile name]
+3) Eva Fong, xsg5by, imthatpiggy
 
 ## To Run
 
-[Add a brief description of how to build and run your .jar file based on this code]
+To run this file, you must first build gradle using the command: ./gradlew build. From there, you run: java -jar build/libs/Apportionment.jar [filename] followed by optional commands for representatives, format, method, and/or ordering of format.
 
 ## Contributions
 
@@ -27,11 +27,11 @@ List the primary contributions of each author. It is recommended to update this 
 * as a bulleted list
 * each line starts with an asterisk and a space
 
-### [Author 3 - replace this with their name]
+### Eva Fong
 
-* Author 3 contributions
-* as a bulleted list
-* each line starts with an asterisk and a space
+* Wrote factory classes for State Supplier, Apportionment Method, and Representation Format.
+* Parsed through the command line options and performed the necessary functions associated with the options. 
+* Rewrote ArgumentsTest to accomodate the changes made to Arguments class.
 
 ## Issues
 

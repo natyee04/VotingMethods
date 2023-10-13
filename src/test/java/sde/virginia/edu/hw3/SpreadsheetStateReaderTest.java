@@ -16,10 +16,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author Will-McBurney
  */
 class SpreadsheetStateReaderTest {
+    private String getResource(String resourceName) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        try {
+            return Objects.requireNonNull(classLoader.getResource(resourceName)).toURI().getPath();
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error! The resource was unable to be loaded.");
+        }
+    }
+
     @Test
     void getStates_normal_xlsx() {
-        var classLoader = SpreadsheetStateReaderTest.class.getClassLoader();
-        var filename = Objects.requireNonNull(classLoader.getResource("excelExampleNormal.xlsx")).getFile();
+        var filename = getResource("excelExampleNormal.xlsx");
         var excelStateReader = new SpreadsheetStateReader(filename);
 
         var states = excelStateReader.getStates();
@@ -38,8 +47,7 @@ class SpreadsheetStateReaderTest {
 
     @Test
     void getStates_normal_xls() {
-        var classLoader = SpreadsheetStateReaderTest.class.getClassLoader();
-        var filename = Objects.requireNonNull(classLoader.getResource("excelExampleNormal.xls")).getFile();
+        var filename = getResource("excelExampleNormal.xls");
         var excelStateReader = new SpreadsheetStateReader(filename);
 
         var states = excelStateReader.getStates();
@@ -58,8 +66,7 @@ class SpreadsheetStateReaderTest {
 
     @Test
     void getStates_badLines_xlsx() {
-        var classLoader = SpreadsheetStateReaderTest.class.getClassLoader();
-        var filename = Objects.requireNonNull(classLoader.getResource("excelExampleBadLines.xlsx")).getFile();
+        var filename = getResource("excelExampleBadLines.xlsx");
         var excelStateReader = new SpreadsheetStateReader(filename);
 
         var states = excelStateReader.getStates();
