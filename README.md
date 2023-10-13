@@ -17,14 +17,14 @@ List the primary contributions of each author. It is recommended to update this 
 
 ### Rebecca Wu
 
-* implemented part 2
-* testing
+* Implemented benefit format for the output of apportionment.
+* Created test cases through JUnit5 testing for benefit format.
 
 ### Natalie Yee
 
-* implemented part 1
-* testing
-* question 1 in QUESTIONS.md
+* Implemented Huntington-Hill method for apportionment.
+* Created test cases through JUnit5 testing for Huntington-Hill method.
+* Answered question 1 in QUESTIONS.md.
 
 ### Eva Fong
 
