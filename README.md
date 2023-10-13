@@ -9,7 +9,7 @@
 
 ## To Run
 
-To run this file, you must first 
+To run this file, you must first build gradle using the command: ./gradlew build. From there, you run: java -jar build/libs/Apportionment.jar [filename] followed by optional commands for representatives, format, method, and/or ordering of format.
 
 ## Contributions
 
@@ -29,9 +29,9 @@ List the primary contributions of each author. It is recommended to update this 
 
 ### Eva Fong
 
-* Author 3 contributions
-* as a bulleted list
-* each line starts with an asterisk and a space
+* Wrote factory classes for State Supplier, Apportionment Method, and Representation Format.
+* Parsed through the command line options and performed the necessary functions associated with the options. 
+* Rewrote ArgumentsTest to accomodate the changes made to Arguments class.
 
 ## Issues
 
